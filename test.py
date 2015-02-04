@@ -25,7 +25,7 @@ if __name__ == '__main__':
     y2 = map(func(2), data.target)
 
 
-    clf = BasicExtreamLearningMachine()
+    clf = BasicExtreamLearningMachine(n=5000)
     for y in [y0, y1, y2]:
         scores = cross_validation.cross_val_score(clf, X, y, cv=10)
         print("Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))

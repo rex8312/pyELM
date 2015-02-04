@@ -7,8 +7,8 @@ from sklearn.linear_model import Perceptron
 
 class BasicExtreamLearningMachine(BaseEstimator, ClassifierMixin):
 
-    def __init__(self):
-        self.n = 8
+    def __init__(self, n=8):
+        self.n = n
         self.a = None
         self.b = None
         self.clf = Perceptron()
