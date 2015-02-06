@@ -18,7 +18,7 @@ class BasicExtreamLearningMachine(BaseEstimator, ClassifierMixin):
         return X1
 
     def fit(self, X, y):
-        self.a = np.random.random((self.n, X.shape[1]))
+        self.a = np.random.random((self.n, X.shape[1])) * 2.0 - 0.5
         H = self.g_func(X.dot(self.a.T))
         inv_H = np.matrix(H).getI()
         self.b = inv_H.dot(y)
