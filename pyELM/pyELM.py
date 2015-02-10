@@ -6,17 +6,34 @@ from sklearn.linear_model import Perceptron
 from sklearn.preprocessing import normalize
 
 
+"""
+def normalized(a, axis=-1, order=0):
+    l2 = np.atleast_1d(np.linalg.norm(a, order, axis))
+    l2[l2 == 0] = 1
+    return a / np.expand_dims(l2, axis)
+"""
+
+def normalized(X):
+    x_max = np.max(X, axis=0)
+    x_min = np.min(X, axis=0)
+    x_max_ = np.tile(x_max, (X.shape[0], 1))
+    x_min_ = np.tile(x_min, (X.shape[0], 1))
+    X_ = (X - x_min_) / (x_max_ - x_min_)
+    #X_ = 2. * X_ - 1.
+    return X_
+
+
 class BasicExtreamLearningMachine(BaseEstimator, ClassifierMixin):
 
-    def __init__(self, L=100, _lambda=1.0):
+    def __init__(self, L=100, _lambda=5.0):
         self.L = L
         self.a = None
         self.b = None
         self._lambda = _lambda
-        self.g_func = self.logistic_func
+        self.g_func = self.sigmoid
 
-    def logistic_func(self, X):
-        X1 = 1.0 / (1. + np.exp(-X))
+    def sigmoid(self, X):
+        X1 = 1.0 / (1.0 + np.exp(-X)) #* 2. - 1.
         return X1
 
     def tanh_func(self, X):
@@ -27,20 +44,22 @@ class BasicExtreamLearningMachine(BaseEstimator, ClassifierMixin):
         return np.append(X, np.ones((X.shape[0], 1)), axis=1)
 
     def fit(self, X, y):
-        X = normalize(X, axis=0)
+        X = normalized(X)
         X = self._append_bias(X)
-        T = y
+        T = np.array(y)
 
-        self.a = np.random.random((self.L, X.shape[1]))
+        self.a = np.random.random((self.L, X.shape[1])) #* 2. - 1.
+        #print X.shape, self.a.T.shape
         H = self.g_func(X.dot(self.a.T))
 
         try:
             HH = np.mat(H.dot(H.T))
-            iHH = np.mat(1./self._lambda + HH).getI()
+            iHH = np.mat(1. / self._lambda + HH).getI()
             self.b = H.T.dot(iHH).dot(T)
         except np.linalg.linalg.LinAlgError as e:
+            #print 'singular'
             HH = np.mat(H.T.dot(H))
-            iHH = np.mat(1./self._lambda + HH).getI()
+            iHH = np.mat(1. / self._lambda + HH).getI()
             self.b = iHH.dot(H.T).dot(T)
 
         return self
@@ -49,18 +68,10 @@ class BasicExtreamLearningMachine(BaseEstimator, ClassifierMixin):
         X = normalize(X, axis=0)
         X = self._append_bias(X)
         H = self.g_func(X.dot(self.a.T))
-        prediction = self.g_func(H.dot(self.b.T))
+        prediction = H.dot(self.b.T)
 
-        max_p = np.max(prediction)
-        min_p = np.min(prediction)
-        nprediction = prediction / (max_p - min_p) - min_p
-        from copy import deepcopy
-        nprediction = normalize(deepcopy(prediction), axis=0)
-        # http://scikit-learn.org/stable/modules/preprocessing.html
-        #1: (0.83-0.28) = x: 0.80
+        nprediction = normalized(prediction)
+        #rs = np.array(np.ones(nprediction.shape) * np.mean(nprediction) > nprediction, dtype=int)
+        rs = np.array(np.ones(nprediction.shape) * 0.5 < nprediction, dtype=int)
 
-        print max_p, min_p
-        for i, _y in enumerate(zip(prediction, nprediction)):
-            print i, _y
-        exit()
-        return prediction.tolist()
+        return rs
