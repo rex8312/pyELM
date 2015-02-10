@@ -4,6 +4,7 @@ import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.linear_model import Perceptron
 from sklearn.preprocessing import normalize
+from scipy.linalg import pinv2
 
 
 """
@@ -51,16 +52,7 @@ class BasicExtreamLearningMachine(BaseEstimator, ClassifierMixin):
         self.a = np.random.random((self.L, X.shape[1])) #* 2. - 1.
         #print X.shape, self.a.T.shape
         H = self.g_func(X.dot(self.a.T))
-
-        try:
-            HH = np.mat(H.dot(H.T))
-            iHH = np.mat(1. / self._lambda + HH).getI()
-            self.b = H.T.dot(iHH).dot(T)
-        except np.linalg.linalg.LinAlgError as e:
-            #print 'singular'
-            HH = np.mat(H.T.dot(H))
-            iHH = np.mat(1. / self._lambda + HH).getI()
-            self.b = iHH.dot(H.T).dot(T)
+        self.b = pinv2(H).dot(T)
 
         return self
 
@@ -69,9 +61,6 @@ class BasicExtreamLearningMachine(BaseEstimator, ClassifierMixin):
         X = self._append_bias(X)
         H = self.g_func(X.dot(self.a.T))
         prediction = H.dot(self.b.T)
-
-        nprediction = normalized(prediction)
-        #rs = np.array(np.ones(nprediction.shape) * np.mean(nprediction) > nprediction, dtype=int)
+        nprediction = normalized(prediction.reshape(prediction.shape[0], 1))
         rs = np.array(np.ones(nprediction.shape) * 0.5 < nprediction, dtype=int)
-
         return rs
