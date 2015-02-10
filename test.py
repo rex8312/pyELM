@@ -14,20 +14,27 @@ def func(idx):
         if x == idx:
             return 1.0
         else:
-            return 0.0
+            return -1.0
     return _func
 
 if __name__ == '__main__':
     data = load_iris()
-    X = normalize(data.data, axis=0)
+    X = data.data
     y0 = map(func(0), data.target)
     y1 = map(func(1), data.target)
     y2 = map(func(2), data.target)
 
     L = int(len(X) * 0.9)
-    L = 256
+    L = 150
 
     clf = BasicExtreamLearningMachine(L=L)
+    clf.fit(X, y0)
+    y = clf.predict(X)
+    for i, _y in enumerate(y):
+        print i, _y
+    exit()
+
+
     for y in [y0, y1, y2]:
         scores = cross_validation.cross_val_score(clf, X, y, cv=10)
         print("Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))

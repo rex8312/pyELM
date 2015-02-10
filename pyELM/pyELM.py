@@ -3,29 +3,35 @@ __author__ = 'rex8312'
 import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.linear_model import Perceptron
+from sklearn.preprocessing import normalize
 
 
 class BasicExtreamLearningMachine(BaseEstimator, ClassifierMixin):
 
-    def __init__(self, L=100, _lambda=100.0):
+    def __init__(self, L=100, _lambda=1.0):
         self.L = L
         self.a = None
         self.b = None
         self._lambda = _lambda
+        self.g_func = self.logistic_func
 
-    def g_func(self, X):
-        X1 = 1. / (1. + np.exp(-X))
+    def logistic_func(self, X):
+        X1 = 1.0 / (1. + np.exp(-X))
+        return X1
+
+    def tanh_func(self, X):
+        X1 = (1.0 - np.exp(-2.0 * X)) / (1.0 + np.exp(-2.0 * X))
         return X1
 
     def _append_bias(self, X):
         return np.append(X, np.ones((X.shape[0], 1)), axis=1)
 
     def fit(self, X, y):
+        X = normalize(X, axis=0)
         X = self._append_bias(X)
         T = y
 
-        self.a = np.random.random((self.L, X.shape[1])) * 2.0 - 1.0
-        print self.a.shape
+        self.a = np.random.random((self.L, X.shape[1]))
         H = self.g_func(X.dot(self.a.T))
 
         try:
@@ -40,13 +46,21 @@ class BasicExtreamLearningMachine(BaseEstimator, ClassifierMixin):
         return self
 
     def predict(self, X):
+        X = normalize(X, axis=0)
         X = self._append_bias(X)
         H = self.g_func(X.dot(self.a.T))
-        y_0 = self.g_func(H.dot(self.b.T))
-        y_1 = list()
-        for y in y_0:
-            if y > 0.5:
-                y_1.append(1.0)
-            else:
-                y_1.append(0.0)
-        return y_1
+        prediction = self.g_func(H.dot(self.b.T))
+
+        max_p = np.max(prediction)
+        min_p = np.min(prediction)
+        nprediction = prediction / (max_p - min_p) - min_p
+        from copy import deepcopy
+        nprediction = normalize(deepcopy(prediction), axis=0)
+        # http://scikit-learn.org/stable/modules/preprocessing.html
+        #1: (0.83-0.28) = x: 0.80
+
+        print max_p, min_p
+        for i, _y in enumerate(zip(prediction, nprediction)):
+            print i, _y
+        exit()
+        return prediction.tolist()
