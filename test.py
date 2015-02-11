@@ -2,27 +2,33 @@
 
 __author__ = 'rex8312'
 
-from sklearn.datasets import load_iris
+from sklearn import datasets
 from sklearn import cross_validation
 from sklearn.preprocessing import StandardScaler
 from sklearn.cross_validation import train_test_split
+from time import time
+from datetime import timedelta
 
 from pyELM.pyELM import BasicExtreamLearningMachine
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import Perceptron
+from sklearn.svm import SVC
+from sklearn.svm import LinearSVC
 
+import numpy as np
 
-def func(idx):
-    def _func(x):
-        if x == idx:
-            return 1
-        else:
-            return 0
-    return _func
 
 if __name__ == '__main__':
     stdsc = StandardScaler()
-    data = load_iris()
-    X = stdsc.fit_transform(data.data)
-    y = data.target
+
+    #data = datasets.load_iris()
+    #data = datasets.load_digits()
+    #X = stdsc.fit_transform(data.data)
+    #y = data.target
+
+    X, y = datasets.make_classification(n_samples=2000, n_features=100, n_classes=2)
+    X = stdsc.fit_transform(X)
+
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
     """
@@ -41,8 +47,23 @@ if __name__ == '__main__':
     print correct / (correct + incorrect)
 #    exit()
     """
+    classifiers = [
+        BasicExtreamLearningMachine,
+        DecisionTreeClassifier,
+        Perceptron,
+        SVC,
+        LinearSVC
+    ]
 
-    clf = BasicExtreamLearningMachine()
-    scores = cross_validation.cross_val_score(clf, X, y, cv=10)
-    print("Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std()))
+    for classifier in classifiers:
+        scores = list()
+        start = time()
+        for _ in range(1):
+            clf = classifier()
+            scores.extend(cross_validation.cross_val_score(clf, X, y, cv=10))
+        scores = np.array(scores)
+        end = time()
+        print("%30s: Accuracy: %0.2f (+/- %0.2f): %s" % (
+            clf.__class__.__name__, scores.mean(), scores.std(), timedelta(seconds=end-start))
+        )
 
