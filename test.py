@@ -3,8 +3,9 @@
 __author__ = 'rex8312'
 
 from sklearn.datasets import load_iris
-from sklearn.preprocessing import normalize
 from sklearn import cross_validation
+from sklearn.preprocessing import StandardScaler
+from sklearn.cross_validation import train_test_split
 
 from pyELM.pyELM import BasicExtreamLearningMachine
 
@@ -18,29 +19,30 @@ def func(idx):
     return _func
 
 if __name__ == '__main__':
+    stdsc = StandardScaler()
     data = load_iris()
-    X = data.data
-    y0 = map(func(0), data.target)
-    y1 = map(func(1), data.target)
-    y2 = map(func(2), data.target)
-
+    X = stdsc.fit_transform(data.data)
+    y = data.target
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
     """
-    L = int(len(X) * 0.9)
-    L = 1000
-
-    yi = y2
-    clf = BasicExtreamLearningMachine(L=L)
-    clf.fit(X, yi)
-    yo = clf.predict(X)
-    for i, _y in enumerate(zip(yi, yo)):
+    clf = BasicExtreamLearningMachine()
+    clf.fit(X_train, y_train)
+    yo = clf.predict(X_test)
+    correct = 0.
+    incorrect = 0.
+    for i, _y in enumerate(zip(y_test, yo)):
         print i, _y
-    exit()
+        if _y[0] == _y[1]:
+            correct += 1
+        else:
+            incorrect += 1
+
+    print correct / (correct + incorrect)
+#    exit()
     """
 
-    for y in [y0, y1, y2]:
-        L = int(len(X) * 0.9)
-        clf = BasicExtreamLearningMachine(L=L)
-        scores = cross_validation.cross_val_score(clf, X, y, cv=10)
-        print("Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+    clf = BasicExtreamLearningMachine()
+    scores = cross_validation.cross_val_score(clf, X, y, cv=10)
+    print("Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std()))
 
