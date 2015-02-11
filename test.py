@@ -19,40 +19,20 @@ import numpy as np
 
 
 if __name__ == '__main__':
-    stdsc = StandardScaler()
 
     #data = datasets.load_iris()
-    #data = datasets.load_digits()
-    #X = stdsc.fit_transform(data.data)
-    #y = data.target
-
-    X, y = datasets.make_classification(n_samples=2000, n_features=100, n_classes=2)
-    X = stdsc.fit_transform(X)
+    data = datasets.load_digits()
+    X, y = data.data, data.target
+    # X, y = datasets.make_classification(n_samples=1000, n_features=20, n_classes=2)
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
-    """
-    clf = BasicExtreamLearningMachine()
-    clf.fit(X_train, y_train)
-    yo = clf.predict(X_test)
-    correct = 0.
-    incorrect = 0.
-    for i, _y in enumerate(zip(y_test, yo)):
-        print i, _y
-        if _y[0] == _y[1]:
-            correct += 1
-        else:
-            incorrect += 1
-
-    print correct / (correct + incorrect)
-#    exit()
-    """
     classifiers = [
         BasicExtreamLearningMachine,
         DecisionTreeClassifier,
         Perceptron,
         SVC,
-        LinearSVC
+        LinearSVC,
     ]
 
     for classifier in classifiers:
