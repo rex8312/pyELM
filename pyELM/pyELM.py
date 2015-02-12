@@ -19,9 +19,10 @@ class BasicExtreamLearningMachine(BaseEstimator, ClassifierMixin):
         return np.append(X, np.ones((X.shape[0], 1)), axis=1)
 
     def _set_L(self, X):
-        self.L = X.shape[0] * 1.5
-        self.L = max(self.L, 1000)
-        self.L = min(self.L, 5000)
+        self.L = X.shape[0]
+        self.L = 10
+        #self.L = max(self.L, 1000)
+        #self.L = min(self.L, 5000)
 
     def fit(self, X, y):
         stdsc = StandardScaler()
@@ -40,13 +41,15 @@ class BasicExtreamLearningMachine(BaseEstimator, ClassifierMixin):
         self.b = pinv2(H).dot(T)
         return self
 
-    def predict(self, X):
+    def decision_function(self, X):
         stdsc = StandardScaler()
         X = stdsc.fit_transform(X)
         X = self._append_bias(X)
 
         H = self.g_func(X.dot(self.a.T))
-        raw_prediction = H.dot(self.b)
+        return  H.dot(self.b)
 
+    def predict(self, X):
+        raw_prediction = self.decision_function(X)
         class_prediction = self.binarizer.inverse_transform(raw_prediction)
         return class_prediction
