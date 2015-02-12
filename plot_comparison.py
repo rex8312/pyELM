@@ -8,10 +8,6 @@ from matplotlib.colors import ListedColormap
 from sklearn.datasets import make_moons, make_circles, make_classification
 from sklearn.preprocessing import StandardScaler
 from sklearn.cross_validation import train_test_split
-from sklearn.linear_model import LogisticRegression
-
-from elm import GenELMClassifier
-from random_layer import RBFRandomLayer, MLPRandomLayer
 from pyELM.pyELM import BasicExtreamLearningMachine
 from sklearn.svm import SVC
 from sklearn.svm import LinearSVC
@@ -27,11 +23,16 @@ def make_classifiers():
         ("SVC", SVC()),
         ('Linear SVC', LinearSVC()),
         ("My ELM", BasicExtreamLearningMachine()),
-        ('ELM ensmnble', BaggingClassifier(base_estimator=BasicExtreamLearningMachine(),
-                                           n_estimators=10, max_samples=1.0, max_features=1.0)),
+        ('ELM ensmnble 10', BaggingClassifier(base_estimator=BasicExtreamLearningMachine(),
+                                              n_estimators=10, max_samples=1.0, max_features=1.0)),
+        ('ELM ensmnble 20', BaggingClassifier(base_estimator=BasicExtreamLearningMachine(),
+                                              n_estimators=20, max_samples=1.0, max_features=1.0)),
+        ('ELM ensmnble 30', BaggingClassifier(base_estimator=BasicExtreamLearningMachine(),
+                                              n_estimators=30, max_samples=1.0, max_features=1.0)),
         ]
 
     return classifiers
+
 
 def get_data_bounds(X):
     h = .02  # step size in the mesh

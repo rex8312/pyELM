@@ -47,9 +47,8 @@ class BasicExtreamLearningMachine(BaseEstimator, ClassifierMixin):
         H = self.g_func(X.dot(self.a.T))
         raw_prediction = H.dot(self.b)
         normalized_prediction = stdsc.fit_transform(raw_prediction)
-        return normalized_prediction
+        class_prediction = self.binarizer.inverse_transform(normalized_prediction)
+        return class_prediction
 
     def predict(self, X):
-        raw_prediction = self.decision_function(X)
-        class_prediction = self.binarizer.inverse_transform(raw_prediction)
-        return class_prediction
+        return self.decision_function(X)
