@@ -1,68 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-"""
-======================
-ELM Classifiers Comparison
-======================
-A comparison of a several ELMClassifiers with different types of hidden
-layer activations.
-
-ELMClassifier is a classifier based on the Extreme Learning Machine,
-a single layer feedforward network with random hidden layer components
-and least squares fitting of the hidden->output weights by default [1][2]
-
-The point of this example is to illustrate the nature of decision boundaries
-with different hidden layer activation types and regressors.
-
-This should be taken with a grain of salt, as the intuition conveyed by
-these examples does not necessarily carry over to real datasets.
-
-In particular in high dimensional spaces data can more easily be separated
-linearly and the simplicity of classifiers such as naive Bayes and linear SVMs
-might lead to better generalization.
-
-The plots show training points in solid colors and testing points
-semi-transparent. The lower right shows the classification accuracy on the test
-set.
-
-References
-__________
-.. [1] http://www.extreme-learning-machines.org
-.. [2] G.-B. Huang, Q.-Y. Zhu and C.-K. Siew, "Extreme Learning Machine:
-          Theory and Applications", Neurocomputing, vol. 70, pp. 489-501,
-          2006.
-
-===============================================================================
-Basis Functions:
-  gaussian rbf  : exp(-gamma * (||x-c||/r)^2)
-  tanh          : np.tanh(a)
-  sinsq         : np.power(np.sin(a), 2.0)
-  tribas        : np.clip(1.0 - np.fabs(a), 0.0, 1.0)
-  hardlim       : np.array(a > 0.0, dtype=float)
-
-     where x   : input pattern
-           a   : dot_product(x, c) + b
-           c,r : randomly generated components
-
-Label Legend:
-  ELM(10,tanh)      :10 tanh units
-  ELM(10,tanh,LR)   :10 tanh units, LogisticRegression
-  ELM(10,sinsq)     :10 sin*sin units
-  ELM(10,tribas)    :10 tribas units
-  ELM(10,hardlim)   :10 hardlim units
-  ELM(20,rbf(0.1))  :20 rbf units gamma=0.1
-
-"""
-print __doc__
-
-
-# Code source: Gael Varoqueux
-#              Andreas Mueller
-# Modified for Documentation merge by Jaques Grobler
-# Modified for Extreme Learning Machine Classifiers by David Lambert
-# License: BSD
-
 import numpy as np
 import pylab as pl
 
@@ -75,10 +13,25 @@ from sklearn.linear_model import LogisticRegression
 from elm import GenELMClassifier
 from random_layer import RBFRandomLayer, MLPRandomLayer
 from pyELM.pyELM import BasicExtreamLearningMachine
-from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
-from collections import OrderedDict
+from sklearn.svm import LinearSVC
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import BaggingClassifier
+from sklearn.ensemble import RandomForestClassifier
 
+
+def make_classifiers():
+    classifiers = [
+        ('Decision Tree', DecisionTreeClassifier()),
+        ('Random Forrest', RandomForestClassifier(n_estimators=50)),
+        ("SVC", SVC()),
+        ('Linear SVC', LinearSVC()),
+        ("My ELM", BasicExtreamLearningMachine()),
+        ('ELM ensmnble', BaggingClassifier(base_estimator=BasicExtreamLearningMachine(),
+                                           n_estimators=10, max_samples=1.0, max_features=1.0)),
+        ]
+
+    return classifiers
 
 def get_data_bounds(X):
     h = .02  # step size in the mesh
@@ -141,39 +94,6 @@ def make_datasets():
     ]
 
 
-def make_classifiers():
-    nh = 10
-
-    # pass user defined transfer func
-    sinsq = (lambda x: np.power(np.sin(x), 2.0))
-    srhl_sinsq = MLPRandomLayer(n_hidden=nh, activation_func=sinsq)
-
-    # use internal transfer funcs
-    srhl_tanh = MLPRandomLayer(n_hidden=nh, activation_func='tanh')
-
-    srhl_tribas = MLPRandomLayer(n_hidden=nh, activation_func='tribas')
-
-    srhl_hardlim = MLPRandomLayer(n_hidden=nh, activation_func='hardlim')
-
-    # use gaussian RBF
-    srhl_rbf = RBFRandomLayer(n_hidden=nh*2, rbf_width=0.1, random_state=0)
-
-    log_reg = LogisticRegression()
-
-    classifiers = [
-        ("ELM(10,tanh)", GenELMClassifier(hidden_layer=srhl_tanh)),
-        ("ELM(10,tanh,LR)", GenELMClassifier(hidden_layer=srhl_tanh, regressor=log_reg)),
-        ("ELM(10,sinsq)", GenELMClassifier(hidden_layer=srhl_sinsq)),
-        ("ELM(10,tribas)", GenELMClassifier(hidden_layer=srhl_tribas)),
-        ("ELM(hardlim)",  GenELMClassifier(hidden_layer=srhl_hardlim)),
-        ("ELM(20,rbf(0.1))", GenELMClassifier(hidden_layer=srhl_rbf)),
-        ("My ELM", BasicExtreamLearningMachine()),
-        ("SVC", SVC()),
-    ]
-
-    return classifiers
-
-
 if __name__ == '__main__':
     datasets = make_datasets()
     classifiers = make_classifiers()
@@ -199,11 +119,15 @@ if __name__ == '__main__':
         for name, clf in classifiers:
             ax = pl.subplot(len(datasets), len(classifiers) + 1, i)
             clf.fit(X_train, y_train)
+
             score = clf.score(X_test, y_test)
 
             # Plot the decision boundary. For that, we will asign a color to each
             # point in the mesh [x_min, m_max]x[y_min, y_max].
-            Z = clf.decision_function(np.c_[xx.ravel(), yy.ravel()])
+            if hasattr(clf, "decision_function"):
+                Z = clf.decision_function(np.c_[xx.ravel(), yy.ravel()])
+            else:
+                Z = clf.predict_proba(np.c_[xx.ravel(), yy.ravel()])[:, 1]
 
             # Put the result into a color plot
             Z = Z.reshape(xx.shape)
