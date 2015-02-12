@@ -77,6 +77,7 @@ from random_layer import RBFRandomLayer, MLPRandomLayer
 from pyELM.pyELM import BasicExtreamLearningMachine
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
+from collections import OrderedDict
 
 
 def get_data_bounds(X):
@@ -159,16 +160,16 @@ def make_classifiers():
 
     log_reg = LogisticRegression()
 
-    classifiers = {
-        "1. ELM(10,tanh)": GenELMClassifier(hidden_layer=srhl_tanh),
-        "2. ELM(10,tanh,LR)": GenELMClassifier(hidden_layer=srhl_tanh, regressor=log_reg),
-        "3. ELM(10,sinsq)": GenELMClassifier(hidden_layer=srhl_sinsq),
-        "4. ELM(10,tribas)": GenELMClassifier(hidden_layer=srhl_tribas),
-        "5. ELM(hardlim)":  GenELMClassifier(hidden_layer=srhl_hardlim),
-        "6. ELM(20,rbf(0.1))": GenELMClassifier(hidden_layer=srhl_rbf),
-        "7. My ELM": BasicExtreamLearningMachine(),
-        "8. SVC": SVC(),
-    }
+    classifiers = [
+        ("ELM(10,tanh)", GenELMClassifier(hidden_layer=srhl_tanh)),
+        ("ELM(10,tanh,LR)", GenELMClassifier(hidden_layer=srhl_tanh, regressor=log_reg)),
+        ("ELM(10,sinsq)", GenELMClassifier(hidden_layer=srhl_sinsq)),
+        ("ELM(10,tribas)", GenELMClassifier(hidden_layer=srhl_tribas)),
+        ("ELM(hardlim)",  GenELMClassifier(hidden_layer=srhl_hardlim)),
+        ("ELM(20,rbf(0.1))", GenELMClassifier(hidden_layer=srhl_rbf)),
+        ("My ELM", BasicExtreamLearningMachine()),
+        ("SVC", SVC()),
+    ]
 
     return classifiers
 
@@ -195,7 +196,7 @@ if __name__ == '__main__':
         i += 1
 
         # iterate over classifiers
-        for name, clf in sorted(classifiers.items()):
+        for name, clf in classifiers:
             ax = pl.subplot(len(datasets), len(classifiers) + 1, i)
             clf.fit(X_train, y_train)
             score = clf.score(X_test, y_test)
