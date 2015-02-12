@@ -20,12 +20,13 @@ import numpy as np
 
 if __name__ == '__main__':
 
-    #data = datasets.load_iris()
+    ds = list()
+    data = datasets.load_iris()
+    ds.append(('iris', data.data, data.target))
     data = datasets.load_digits()
-    X, y = data.data, data.target
-    # X, y = datasets.make_classification(n_samples=1000, n_features=20, n_classes=2)
-
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+    ds.append(('digits', data.data, data.target))
+    X, y = datasets.make_classification(n_samples=1000, n_features=20, n_classes=2)
+    ds.append(('gen', X, y))
 
     classifiers = [
         BasicExtreamLearningMachine,
@@ -35,15 +36,18 @@ if __name__ == '__main__':
         LinearSVC,
     ]
 
-    for classifier in classifiers:
-        scores = list()
-        start = time()
-        for _ in range(1):
-            clf = classifier()
-            scores.extend(cross_validation.cross_val_score(clf, X, y, cv=10))
-        scores = np.array(scores)
-        end = time()
-        print("%30s: Accuracy: %0.2f (+/- %0.2f): %s" % (
-            clf.__class__.__name__, scores.mean(), scores.std(), timedelta(seconds=end-start))
-        )
+    for data_name, X, y in ds:
+        print '*'*10 + ' ' + data_name + ' ' + '*'*10
+        for classifier in classifiers:
+            start = time()
+            scores = list()
+            for _ in range(10):
+                clf = classifier()
+                scores.extend(cross_validation.cross_val_score(clf, X, y, cv=10))
+            scores = np.array(scores)
+            end = time()
+            print("%30s: %10s: Accuracy: %0.3f (+/- %0.3f): %s" % (
+                clf.__class__.__name__, data_name, scores.mean(), scores.std(), timedelta(seconds=end-start))
+            )
+        print
 

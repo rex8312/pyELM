@@ -167,8 +167,7 @@ def make_classifiers():
         "5. ELM(hardlim)":  GenELMClassifier(hidden_layer=srhl_hardlim),
         "6. ELM(20,rbf(0.1))": GenELMClassifier(hidden_layer=srhl_rbf),
         "7. My ELM": BasicExtreamLearningMachine(),
-        #"8. DecisionTree": DecisionTreeClassifier(),
-        "9. SVC": SVC(),
+        "8. SVC": SVC(),
     }
 
     return classifiers
