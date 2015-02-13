@@ -2,7 +2,9 @@
 
 __author__ = 'rex8312'
 
-from sklearn import datasets
+from sklearn.datasets import load_iris, load_digits
+from sklearn.datasets import make_moons, make_circles
+from plot_comparison import make_linearly_separable
 from sklearn import cross_validation
 from time import time
 from datetime import timedelta
@@ -12,16 +14,28 @@ from plot_comparison import make_classifiers
 import numpy as np
 
 
+def make_datasets():
+    ds = list()
+
+    data = load_iris()
+    ds.append(('iris', data.data, data.target))
+
+    data = load_digits()
+    ds.append(('digits', data.data, data.target))
+
+    X, y = make_moons(n_samples=200, noise=0.3, random_state=0)
+    ds.append(('moons', X, y))
+
+    X, y = make_circles(n_samples=200, noise=0.2, factor=0.5, random_state=1)
+    ds.append(('circles', X, y))
+
+    X, y = make_linearly_separable()
+    ds.append(('linearly separable', X, y))
+    return ds
+
 if __name__ == '__main__':
 
-    ds = list()
-    data = datasets.load_iris()
-    ds.append(('iris', data.data, data.target))
-    data = datasets.load_digits()
-    ds.append(('digits', data.data, data.target))
-    X, y = datasets.make_classification(n_samples=1000, n_features=20, n_classes=2)
-    ds.append(('gen', X, y))
-
+    ds = make_datasets()
     classifiers = make_classifiers()
 
     for data_name, X, y in ds:
