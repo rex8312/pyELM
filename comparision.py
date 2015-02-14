@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__author__ = 'rex8312'
+__author__ = 'Hyunsoo Park'
 
 from sklearn.datasets import load_iris, load_digits
 from sklearn.datasets import make_moons, make_circles

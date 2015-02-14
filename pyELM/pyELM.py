@@ -1,4 +1,6 @@
-__author__ = 'rex8312'
+# -*- coding: utf-8 -*-
+
+__author__ = 'Hyunsoo Park'
 
 import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin
