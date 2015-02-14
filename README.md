@@ -9,4 +9,4 @@ python comparision.py
 python plot_comparision.py
 ```
 
-[ploat_comparision.py의 실행 결과](figure_1.png)
+![ploat_comparision.py의 실행 결과](figure_1.png)
